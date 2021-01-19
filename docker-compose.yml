@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  db:
+    image: redis
+    container_name: davy-db
+    ports:
+      - "6379:6379"

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Davy</title>
+    <link rel="stylesheet" type="text/css" href="/static/index.css">
+</head>
+
+<body>
+    <main>
+        <div class="user-form">
+            {{if .}}
+            <div class="error-form">{{.}}</div>
+            {{end}}
+            <form method="post">
+                <div class="windput">Username: <input type="text" name="username"></div>
+                <div class="windput">Password: <input type="password" name="password"></div>
+                <div class="windput"><button type="submit">Login</button></div>
+            </form>
+        </div>
+    </main>
+</body>
+
+</html>

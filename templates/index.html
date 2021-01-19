@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} / Updates / Davy</title>
+    <link rel="stylesheet" type="text/css" href="/static/index.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            {{if .User}}
+            <form action="/{{.User}}" method="get" class="form-inline"><button>Profile</button></form>
+            {{else}}
+            <form action="/" method="get" class="form-inline"><button>Home</button></form>
+            {{end}}
+            <form action="/logout" method="post" class="form-inline"><button>Log out</button></form>
+        </nav>
+    </header>
+    <main>
+        <h1>{{.Title}}</h1>
+
+        {{if .DisplayForm}}
+        <div id="update-form">
+            <form action="/" method="post">
+                <div><textarea type="text" name="update" id="comment"></textarea></div>
+                <div><button type="submit">Submit Update</button></div>
+            </form>
+        </div>
+        {{end}}
+        {{range .Updates}}
+        <div class="updates">
+            <div>
+                <strong><a href="/{{.GetUser.GetUsername}}">{{.GetUser.GetUsername}}</a> wrote:</strong>
+            </div>
+            <div>{{.GetBody}}</div>
+        </div>
+        {{end}}
+    </main>
+</body>
+
+</html>

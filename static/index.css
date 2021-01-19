@@ -1,0 +1,73 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #eee;
+}
+
+nav {
+    padding: 0.5em;
+    background-color: #ddd;
+    border-bottom: 1px solid #aaa;
+    text-align: right;
+}
+
+header {
+    margin: 0 auto;
+    max-width: 640px;
+}
+
+main {
+    margin: 0 auto;
+    max-width: 640px;
+}
+
+main>.updates {
+    padding: 0.5em;
+    background-color: #ddd;
+    border: 1px solid #bbb;
+    margin-top: 1em;
+}
+
+.user-form {
+    width: 50%;
+    margin: 12em auto;
+    padding: 1em;
+    background-color: #ddd;
+    border-bottom: 1px solid #aaa;
+}
+
+#update-form {
+    text-align: right;
+    margin: 1em 0;
+}
+
+#update-form form div textarea {
+    width: 100%;
+    margin-bottom: 0.5em;
+    resize: vertical;
+}
+
+.form-inline {
+    display: inline;
+}
+
+form button[type="submit"], form input {
+    padding: .5em;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #aaa;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #fff;
+}
+
+.windput {
+    margin-top: .5em;
+}
+
+.error-form {
+    color: #f33;
+    padding: .5em;
+    border-bottom: 1px solid #e99;
+}

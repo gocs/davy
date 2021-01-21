@@ -54,12 +54,24 @@ main>.updates {
     display: inline;
 }
 
-form button[type="submit"], form input {
-    padding: .5em;
+form button[type="submit"],
+form input {
+    margin: 0 2em;
+    padding: .5em 2em;
     border-top: 1px solid #fff;
     border-bottom: 1px solid #aaa;
     border-left: 1px solid #fff;
     border-right: 1px solid #fff;
+}
+
+form button[type="submit"]:hover,
+form input:hover {
+    margin: 0 2em;
+    padding: .5em 2em;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #fff;
+    border-left: 1px solid #aaa;
+    border-right: 1px solid #aaa;
 }
 
 .windput {
@@ -70,4 +82,9 @@ form button[type="submit"], form input {
     color: #f33;
     padding: .5em;
     border-bottom: 1px solid #e99;
+}
+
+.title {
+    padding: 1em .5em;
+    border-bottom: 1px solid #aaa;
 }

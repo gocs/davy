@@ -5,10 +5,12 @@ import (
 	"strconv"
 )
 
+// Update is a manager for accessing updates in the database
 type Update struct {
 	id int64
 }
 
+// NewUpdate creates a new update, saves it to the database, and returns the newly created question
 func NewUpdate(userID int64, body string) (*Update, error) {
 	id, err := client.Incr("update:next-id").Result()
 	if err != nil {
@@ -29,11 +31,13 @@ func NewUpdate(userID int64, body string) (*Update, error) {
 	return &Update{id: id}, nil
 }
 
+// GetBody Body getter
 func (u *Update) GetBody() (string, error) {
 	key := fmt.Sprintf("update:%d", u.id)
 	return client.HGet(key, "body").Result()
 }
 
+// GetUser User getter
 func (u *Update) GetUser() (*User, error) {
 	key := fmt.Sprintf("update:%d", u.id)
 	userID, err := client.HGet(key, "user_id").Int64()
@@ -61,15 +65,18 @@ func queryUpdates(key string) ([]*Update, error) {
 	return updates, nil
 }
 
+// GetAllUpdates All Updates getter
 func GetAllUpdates() ([]*Update, error) {
 	return queryUpdates("updates")
 }
 
+// GetUpdates gets all updates related to the user
 func GetUpdates(userID int64) ([]*Update, error) {
 	key := fmt.Sprintf("user:%d:updates", userID)
 	return queryUpdates(key)
 }
 
+// PostUpdate adds a new update
 func PostUpdate(userID int64, body string) error {
 	_, err := NewUpdate(userID, body)
 	return err

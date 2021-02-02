@@ -13,3 +13,9 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# ignore vscode esp. where the arguments are optional
+.vscode
+
+# ignore private as it is private
+private

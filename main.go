@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"log"
+
+	"net/http"
 
 	"github.com/gocs/davy/router"
-	"net/http"
 )
 
 var (
@@ -14,7 +16,10 @@ var (
 func main() {
 	flag.Parse()
 
-	r := router.NewRouter(*session)
+	r, err := router.NewRouter(*session)
+	if err != nil {
+		log.Fatal(err)
+	}
 	http.Handle("/", r)
-	http.ListenAndServe(":8080", nil)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

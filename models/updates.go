@@ -40,12 +40,12 @@ func (u *Update) GetBody() (string, error) {
 // GetUser User getter
 func (u *Update) GetUser() (*User, error) {
 	key := fmt.Sprintf("update:%d", u.id)
-	userID, err := client.HGet(key, "user_id").Int64()
+	id, err := client.HGet(key, "user_id").Int64()
 	if err != nil {
 		return nil, err
 	}
 
-	return GetUserByUserID(userID)
+	return &User{id: id}, nil
 }
 
 func queryUpdates(key string) ([]*Update, error) {

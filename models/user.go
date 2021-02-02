@@ -40,9 +40,7 @@ func NewUser(username string, hash []byte) (*User, error) {
 }
 
 // GetUserID UserID getter
-func (u *User) GetUserID() (int64, error) {
-	return u.id, nil
-}
+func (u *User) GetUserID() int64 { return u.id }
 
 // GetUsername Username getter
 func (u *User) GetUsername() (string, error) {
@@ -77,7 +75,12 @@ func RegisterUser(username, password string) error {
 		return err
 	}
 
-	_, err = NewUser(username, hash)
+	u, err := NewUser(username, hash)
+	if err != nil {
+		return err
+	}
+
+	_, err = newUserQuestion(u.id)
 	return err
 }
 
@@ -86,8 +89,8 @@ func GetUserByUserID(userID int64) (*User, error) {
 	return &User{id: userID}, nil
 }
 
-// GetUserByUserID gets user using a user id
-func GetUserIDByUser(user *User) (int64, error) {
+// GetUserIDByUser gets the user id using the user
+func GetUserIDByUser(user *User) int64 {
 	return user.GetUserID()
 }
 
@@ -100,8 +103,7 @@ func GetUserByUsername(username string) (*User, error) {
 		return nil, err
 	}
 
-	u, err := GetUserByUserID(id)
-	return u, err
+	return &User{id: id}, nil
 }
 
 // AuthenticateUser authenticates the user by its username and password
@@ -111,5 +113,8 @@ func AuthenticateUser(username, password string) (*User, error) {
 		return nil, err
 	}
 
-	return user, user.Authenticate(password)
+	if err := user.Authenticate(password); err != nil {
+		return nil, err
+	}
+	return user, nil
 }

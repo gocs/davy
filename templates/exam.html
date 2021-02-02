@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} / Lobby / Davy</title>
+    <link rel="stylesheet" type="text/css" href="/static/index.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            {{if .User}}
+            <span>Points: {{.Points}}</span>
+            <form action="/{{.User}}" method="get" class="form-inline"><button>Profile</button></form>
+            {{else}}
+            <form action="/" method="get" class="form-inline"><button>Home</button></form>
+            {{end}}
+            <form action="/logout" method="post" class="form-inline"><button>Log out</button></form>
+        </nav>
+    </header>
+    <main>
+        <div class="title">
+            <h1>{{.Title}}</h1>
+            {{if .Correct}}
+            <form action="/exam" method="get"><button>Next</button></form>
+            {{end}}
+        </div>
+        <div class="statement">
+            <h3>{{.Question.Statement}}</h3>
+        </div>
+        <div class="choices">
+            {{if .Error}}
+            <div class="error-form">{{.Error}}</div>
+            {{end}}
+            {{range .Question.Choices}}
+            <form method="post">
+                <input type="hidden" name="choice" value="{{.}}">
+                <button type="submit">{{.}}</button>
+            </form>
+            {{end}}
+        </div>
+    </main>
+</body>
+
+</html>

@@ -11,8 +11,8 @@
 <body>
     <main>
         <div class="user-form">
-            {{if .}}
-            <div class="error-form">{{.}}</div>
+            {{if .Error}}
+            <div class="error-form">{{.Error}}</div>
             {{end}}
             <form method="post">
                 <div class="windput">Username: <input type="text" name="username"></div>

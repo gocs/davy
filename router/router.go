@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"github.com/go-redis/redis"
 	"github.com/gocs/davy/loader"
 	"github.com/gocs/davy/middleware"
 	"github.com/gocs/davy/models"
@@ -12,10 +13,13 @@ import (
 )
 
 // NewRouter creates a new router to access some pages
-func NewRouter(sessionKey string) *mux.Router {
+func NewRouter(sessionKey string) (*mux.Router, error) {
 	r := mux.NewRouter()
 
-	models.NewRedisDB() // shiiiiiiiiiiiiiiiiiiiiiiiiiitttttt
+	err := models.NewRedisDB() // shiiiiiiiiiiiiiiiiiiiiiiiiiitttttt
+	if err != nil {
+		return nil, err
+	}
 	a := App{
 		sessions: sessions.New(sessionKey),
 		tmpl:     loader.NewTemplates("templates/*.html"),
@@ -30,12 +34,16 @@ func NewRouter(sessionKey string) *mux.Router {
 	r.HandleFunc("/logout", mar(a.logoutPostHandler)).Methods("POST")
 	r.HandleFunc("/register", a.registerGetHandler).Methods("GET")
 	r.HandleFunc("/register", a.registerPostHandler).Methods("POST")
+
+	r.HandleFunc("/exam", a.examGetHandler).Methods("GET")
+	r.HandleFunc("/exam", a.examPostHandler).Methods("POST")
+
 	fs := http.FileServer(http.Dir("./static/"))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 
 	r.HandleFunc("/{username}", mar(a.userGetHandler)).Methods("GET")
 
-	return r
+	return r, nil
 }
 
 // App handles the state of the application
@@ -44,8 +52,8 @@ type App struct {
 	tmpl     *loader.Templates
 }
 
-// Payload is the data to pass to the template
-type Payload struct {
+// IndexPayload is the data to pass to the template
+type IndexPayload struct {
 	Title       string
 	User        string
 	Updates     []*models.Update
@@ -53,7 +61,11 @@ type Payload struct {
 }
 
 func (a *App) indexGetHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := a.sessions.Store.Get(r, "session")
+	session, err := a.sessions.Store.Get(r, "session")
+	if err != nil {
+		servererrors.InternalServerError(w, err.Error())
+		return
+	}
 	u := session.Values["user_id"]
 	userID, ok := u.(int64)
 	if !ok {
@@ -69,6 +81,18 @@ func (a *App) indexGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	username, err := user.GetUsername()
 	if err != nil {
+		switch err {
+		case redis.Nil:
+			session, err := a.sessions.Store.Get(r, "session")
+			if err != nil {
+				servererrors.InternalServerError(w, err.Error())
+				return
+			}
+			delete(session.Values, "user_id")
+			session.Save(r, w)
+			http.Redirect(w, r, "/login", http.StatusPermanentRedirect)
+			return
+		}
 		servererrors.InternalServerError(w, err.Error())
 		return
 	}
@@ -78,7 +102,7 @@ func (a *App) indexGetHandler(w http.ResponseWriter, r *http.Request) {
 		servererrors.InternalServerError(w, err.Error())
 		return
 	}
-	a.tmpl.ExecuteTemplate(w, "index.html", Payload{
+	a.tmpl.ExecuteTemplate(w, "index.html", IndexPayload{
 		Title:       "All Updates",
 		User:        username,
 		Updates:     updates,
@@ -87,7 +111,11 @@ func (a *App) indexGetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) indexPostHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := a.sessions.Store.Get(r, "session")
+	session, err := a.sessions.Store.Get(r, "session")
+	if err != nil {
+		servererrors.InternalServerError(w, err.Error())
+		return
+	}
 	u := session.Values["user_id"]
 	userID, ok := u.(int64)
 	if !ok {
@@ -97,7 +125,7 @@ func (a *App) indexPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	body := r.PostForm.Get("update")
-	err := models.PostUpdate(userID, body)
+	err = models.PostUpdate(userID, body)
 	if err != nil {
 		servererrors.InternalServerError(w, err.Error())
 		return
@@ -107,7 +135,11 @@ func (a *App) indexPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) userGetHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := a.sessions.Store.Get(r, "session")
+	session, err := a.sessions.Store.Get(r, "session")
+	if err != nil {
+		servererrors.InternalServerError(w, err.Error())
+		return
+	}
 	u := session.Values["user_id"]
 	sessionUserID, ok := u.(int64)
 	if !ok {
@@ -117,6 +149,10 @@ func (a *App) userGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	username := vars["username"]
+	if username == "favicon.ico" || username == "serviceworker.js" {
+		a.tmpl.ExecuteTemplate(w, "login.html", "unknown user")
+		return
+	}
 
 	user, err := models.GetUserByUsername(username)
 	if err != nil {
@@ -129,18 +165,14 @@ func (a *App) userGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := user.GetUserID()
-	if err != nil {
-		servererrors.InternalServerError(w, err.Error())
-		return
-	}
+	userID := user.GetUserID()
 
 	updates, err := models.GetUpdates(userID)
 	if err != nil {
 		servererrors.InternalServerError(w, err.Error())
 		return
 	}
-	a.tmpl.ExecuteTemplate(w, "index.html", Payload{
+	a.tmpl.ExecuteTemplate(w, "index.html", IndexPayload{
 		Title:       username,
 		Updates:     updates,
 		DisplayForm: sessionUserID == userID,
@@ -160,22 +192,22 @@ func (a *App) loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case models.ErrUserNotFound:
-			a.tmpl.ExecuteTemplate(w, "login.html", "unknown user")
+			a.tmpl.ExecuteTemplate(w, "login.html", LoginPayload{Error: "unknown user"})
 		case models.ErrInvalidLogin:
-			a.tmpl.ExecuteTemplate(w, "login.html", "invalid login")
+			a.tmpl.ExecuteTemplate(w, "login.html", LoginPayload{Error: "invalid login"})
 		default:
 			servererrors.InternalServerError(w, err.Error())
 		}
 		return
 	}
 
-	userID, err := models.GetUserIDByUser(user)
+	userID := user.GetUserID()
+
+	session, err := a.sessions.Store.Get(r, "session")
 	if err != nil {
 		servererrors.InternalServerError(w, err.Error())
 		return
 	}
-
-	session, _ := a.sessions.Store.Get(r, "session")
 	session.Values["user_id"] = userID
 	session.Save(r, w)
 
@@ -183,15 +215,23 @@ func (a *App) loginPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) logoutPostHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := a.sessions.Store.Get(r, "session")
+	session, err := a.sessions.Store.Get(r, "session")
+	if err != nil {
+		servererrors.InternalServerError(w, err.Error())
+		return
+	}
 	delete(session.Values, "user_id")
 	session.Save(r, w)
 
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
 
+type LoginPayload struct {
+	Error string
+}
+
 func (a *App) registerGetHandler(w http.ResponseWriter, r *http.Request) {
-	a.tmpl.ExecuteTemplate(w, "register.html", nil)
+	a.tmpl.ExecuteTemplate(w, "register.html", LoginPayload{})
 }
 
 func (a *App) registerPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -203,7 +243,7 @@ func (a *App) registerPostHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case models.ErrUsernameTaken:
-			a.tmpl.ExecuteTemplate(w, "register.html", "username taken")
+			a.tmpl.ExecuteTemplate(w, "register.html", LoginPayload{Error: "username taken"})
 		default:
 			servererrors.InternalServerError(w, err.Error())
 		}

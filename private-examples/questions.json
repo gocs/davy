@@ -1,0 +1,15 @@
+{
+    "questions": [{
+        "statement": "What is not part of United Kingdom?",
+        "answer": "Norway",
+        "choices": ["Wales", "Scotland", "Norway", "England"]
+    }, {
+        "statement": "What is the biggest island in the world?",
+        "answer": "Greenland",
+        "choices": ["Iceland", "Australia", "Greenland", "England"]
+    }, {
+        "statement": "When is the New Year's day?",
+        "answer": "January 1",
+        "choices": ["February 14", "December 25", "January 1", "April 1"]
+    }]
+}

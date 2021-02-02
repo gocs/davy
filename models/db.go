@@ -34,6 +34,9 @@ var (
 	// ErrEmptyUserQuestion specific error for capturing uninitialized array error
 	ErrEmptyUserQuestion = errors.New("user has no question")
 
+	// ErrTypeMismatch specific error for capturing type mismatch
+	ErrTypeMismatch = errors.New("the type didn't match")
+
 	// client is a redis client shadow, make sure this is not null, if you use this
 	// FIXME: this must not be roaming at a package level
 	client *redis.Client // fuuuuck// fuuuuck// fuuuuck// fuuuuck
@@ -41,7 +44,6 @@ var (
 	// ErrNilClient gives error message when redis client variable is nil
 	ErrNilClient = errors.New("client is nil")
 )
-
 
 // MigrateQuestions sends the questions.json to the redis server
 func MigrateQuestions(client *redis.Client, path string) error {

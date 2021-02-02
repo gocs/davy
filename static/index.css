@@ -102,3 +102,9 @@ form input:hover {
 .choices form {
     display: inline-flex;
 }
+
+nav span.nav-span,
+nav a.nav-link {
+    margin-left: .5em;
+    margin-right: .5em;
+}

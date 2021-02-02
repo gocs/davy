@@ -38,6 +38,9 @@ func NewRouter(sessionKey string) (*mux.Router, error) {
 	r.HandleFunc("/exam", a.examGetHandler).Methods("GET")
 	r.HandleFunc("/exam", a.examPostHandler).Methods("POST")
 
+	r.HandleFunc("/rank", a.listTopRank).Methods("GET")
+	r.HandleFunc("/rank/me", a.getCurrentStandings).Methods("GET")
+
 	fs := http.FileServer(http.Dir("./static/"))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 
@@ -58,6 +61,7 @@ type IndexPayload struct {
 	User        string
 	Updates     []*models.Update
 	DisplayForm bool
+	Points      int64
 }
 
 func (a *App) indexGetHandler(w http.ResponseWriter, r *http.Request) {
@@ -102,11 +106,23 @@ func (a *App) indexGetHandler(w http.ResponseWriter, r *http.Request) {
 		servererrors.InternalServerError(w, err.Error())
 		return
 	}
+
+	uq, err := models.GetUserQuestion(userID)
+	if err != nil {
+		servererrors.InternalServerError(w, err.Error())
+		return
+	}
+	p, err := uq.GetPoints()
+	if err != nil {
+		return
+	}
+
 	a.tmpl.ExecuteTemplate(w, "index.html", IndexPayload{
 		Title:       "All Updates",
 		User:        username,
 		Updates:     updates,
 		DisplayForm: true,
+		Points:      p,
 	})
 }
 
@@ -172,10 +188,22 @@ func (a *App) userGetHandler(w http.ResponseWriter, r *http.Request) {
 		servererrors.InternalServerError(w, err.Error())
 		return
 	}
+
+	uq, err := models.GetUserQuestion(userID)
+	if err != nil {
+		servererrors.InternalServerError(w, err.Error())
+		return
+	}
+	p, err := uq.GetPoints()
+	if err != nil {
+		return
+	}
+
 	a.tmpl.ExecuteTemplate(w, "index.html", IndexPayload{
 		Title:       username,
 		Updates:     updates,
 		DisplayForm: sessionUserID == userID,
+		Points:      p,
 	})
 }
 

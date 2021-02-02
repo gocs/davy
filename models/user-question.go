@@ -37,6 +37,7 @@ func newUserQuestion(userID int64) (*UserQuestion, error) {
 	pipe.HSet(key, "user_id", userID)
 	pipe.HSet(key, "question_id", 1)
 	pipe.HSet(key, "points", 0)
+	pipe.HSet(key, "rank", 0)
 	pipe.LPush(fmt.Sprintf("user:%d:questions", userID), 1)
 	pipe.LPush(fmt.Sprintf("user:%d:user-question", userID), id)
 	_, err = pipe.Exec()

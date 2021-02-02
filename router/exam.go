@@ -11,13 +11,13 @@ import (
 
 // ExamPayload is the data to pass to the template
 type ExamPayload struct {
-	CSRF     template.HTML
-	Title    string
-	User     string
-	Question models.QuestionT
-	Correct  bool
-	Points   int64
-	Error    string
+	CSRF        template.HTML
+	Title       string
+	User        string
+	Question    models.QuestionT
+	Correct     bool
+	Points      int64
+	Explanation string
 }
 
 func (a *App) examGetHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,11 +101,6 @@ func (a *App) examPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := uq.GetPoints()
-	if err != nil {
-		return
-	}
-
 	q, err := uq.GetQuestion()
 	if err != nil {
 		servererrors.InternalServerError(w, err.Error())
@@ -127,12 +122,30 @@ func (a *App) examPostHandler(w http.ResponseWriter, r *http.Request) {
 		servererrors.InternalServerError(w, err.Error())
 		return
 	}
+
+	p, err := uq.GetPoints()
+	if err != nil {
+		return
+	}
+
+	var e string
+	// if result is correct update rank else give an explanation
+	if result {
+		if err := models.UpdateRank(userID, p); err != nil {
+			servererrors.InternalServerError(w, err.Error())
+			return
+		}
+	} else {
+		e = "YOU HAVE ENTERED THE WRONG CHOICE!!"
+	}
+
 	a.tmpl.ExecuteTemplate(w, "exam.html", ExamPayload{
-		CSRF:     csrf.TemplateField(r),
-		Title:    "Question",
-		User:     username,
-		Question: *qt,
-		Correct:  result,
-		Points:   p,
+		CSRF:        csrf.TemplateField(r),
+		Title:       "Question",
+		User:        username,
+		Question:    *qt,
+		Correct:     result,
+		Points:      p,
+		Explanation: e,
 	})
 }

@@ -4,19 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}} / Lobby / Davy</title>
+    <title>{{.Title}} / Exam / Davy</title>
     <link rel="stylesheet" type="text/css" href="/static/index.css">
 </head>
 
 <body>
     <header>
         <nav>
+            <span class="nav-span">Points: {{.Points}}</span>|
             {{if .User}}
-            <span>Points: {{.Points}}</span>
-            <form action="/{{.User}}" method="get" class="form-inline"><button>Profile</button></form>
+            <a class="nav-link" href="/{{.User}}">{{.User}}</a>
             {{else}}
-            <form action="/" method="get" class="form-inline"><button>Home</button></form>
-            {{end}}
+            <a class="nav-link" href="/">Home</a>
+            {{end}}|
+            <a class="nav-link" href="/rank">rank</a>
             <form action="/logout" method="post" class="form-inline"><button>Log out</button></form>
         </nav>
     </header>
@@ -31,8 +32,8 @@
             <h3>{{.Question.Statement}}</h3>
         </div>
         <div class="choices">
-            {{if .Error}}
-            <div class="error-form">{{.Error}}</div>
+            {{if .Explanation}}
+            <div class="error-form">{{.Explanation}}</div>
             {{end}}
             {{range .Question.Choices}}
             <form method="post">

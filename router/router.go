@@ -254,6 +254,7 @@ func (a *App) logoutPostHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
 
+// LoginPayload is the data to pass to the template
 type LoginPayload struct {
 	Error string
 }

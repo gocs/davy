@@ -43,6 +43,12 @@ var (
 
 	// ErrNilClient gives error message when redis client variable is nil
 	ErrNilClient = errors.New("client is nil")
+
+	// ErrUserInLobby gives error message when user attempts to join a lobby when is already in lobby
+	ErrUserInLobby = errors.New("user is currently joined in to a lobby")
+
+	// ErrUserNotInLobby gives error message when user attempts to get its current lobby when is not in lobby
+	ErrUserNotInLobby = errors.New("user is currently not joined in to a lobby")
 )
 
 // MigrateQuestions sends the questions.json to the redis server

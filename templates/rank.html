@@ -15,9 +15,9 @@
             <a class="nav-link" href="/{{.User}}">{{.User}}</a>
             {{else}}
             <a class="nav-link" href="/">Home</a>
-            {{end}}
-            <form action="/exam" method="get" class="form-inline"><button>Exam</button></form>
-            <form action="/logout" method="post" class="form-inline"><button>Log out</button></form>
+            {{end}} |
+            <form action="/exam" method="get" class="form-inline nav-btn"><button>Exam</button></form> |
+            <form action="/logout" method="post" class="form-inline nav-btn"><button>Log out</button></form>
         </nav>
     </header>
     <main>

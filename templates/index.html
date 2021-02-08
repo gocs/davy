@@ -16,10 +16,11 @@
             <a class="nav-link" href="/{{.User}}">{{.User}}</a>
             {{else}}
             <a class="nav-link" href="/">Home</a>
-            {{end}}|
-            <a class="nav-link" href="/rank">rank</a>
-            <form action="/exam" method="get" class="form-inline"><button>Exam</button></form>
-            <form action="/logout" method="post" class="form-inline"><button>Log out</button></form>
+            {{end}} |
+            <a class="nav-link" href="/rank">rank</a> |
+            <a class="nav-link" href="/lobby">lobby</a>
+            <form action="/exam" method="get" class="form-inline nav-btn"><button>Exam</button></form> |
+            <form action="/logout" method="post" class="form-inline nav-btn"><button>Log out</button></form>
         </nav>
     </header>
     <main>

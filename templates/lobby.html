@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} / Updates / Davy</title>
+    <link rel="stylesheet" type="text/css" href="/static/index.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            {{if .User}}
+            <a class="nav-link" href="/{{.User}}">{{.User}}</a>
+            {{else}}
+            <a class="nav-link" href="/">Home</a>
+            {{end}} |
+            <a class="nav-link" href="/rank">rank</a> |
+            <form action="/exam" method="get" class="form-inline nav-btn"><button>Exam</button></form> |
+            <form action="/logout" method="post" class="form-inline nav-btn"><button>Log out</button></form>
+        </nav>
+    </header>
+    <main>
+        <h1>{{.Title}}</h1>
+
+        {{if .Joined}}
+        <div id="game" class="center">
+            <h2 class="text-center">Code: {{.Code}}</h2>
+        </div>
+        {{range .Players}}
+        <div class="players">
+            <div><strong><a href="/{{.}}"><span>{{.}}</span></a></strong></div>
+            <div><button>kick</button></div>
+        </div>
+        {{end}}
+        {{else}}
+        <div id="game" class="center">
+            <form method="post">
+                <input type="hidden" name="choice" value="create">
+                <button type="submit">Create New Game</button>
+            </form>
+            <div class="div-center">or</div>
+            <form method="post">
+                <input type="hidden" name="choice" value="join">
+                <input type="text" name="code" id="code" class="input-center">
+                <button type="submit">Join Game</button>
+            </form>
+        </div>
+        {{end}}
+    </main>
+</body>
+
+</html>

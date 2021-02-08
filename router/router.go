@@ -35,8 +35,11 @@ func NewRouter(sessionKey string) (*mux.Router, error) {
 	r.HandleFunc("/register", a.registerGetHandler).Methods("GET")
 	r.HandleFunc("/register", a.registerPostHandler).Methods("POST")
 
-	r.HandleFunc("/exam", a.examGetHandler).Methods("GET")
-	r.HandleFunc("/exam", a.examPostHandler).Methods("POST")
+	r.HandleFunc("/exam", mar(a.examGetHandler)).Methods("GET")
+	r.HandleFunc("/exam", mar(a.examPostHandler)).Methods("POST")
+
+	r.HandleFunc("/lobby", mar(a.lobbyGetHandler)).Methods("GET")
+	r.HandleFunc("/lobby", mar(a.lobbyPostHandler)).Methods("POST")
 
 	r.HandleFunc("/rank", a.listTopRank).Methods("GET")
 	r.HandleFunc("/rank/me", a.getCurrentStandings).Methods("GET")

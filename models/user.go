@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 
+	"github.com/gocs/davy/validator"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,6 +21,11 @@ func NewUser(username string, hash []byte) (*User, error) {
 	if exists {
 		return nil, ErrUsernameTaken
 	}
+	
+	err = validator.Username(username)
+	if err != nil {
+		return nil, err
+	}
 
 	id, err := client.Incr("user:next-id").Result()
 	if err != nil {
@@ -30,6 +36,7 @@ func NewUser(username string, hash []byte) (*User, error) {
 	pipe.HSet(key, "id", id)
 	pipe.HSet(key, "username", username)
 	pipe.HSet(key, "hash", hash)
+	pipe.HSet(key, "lobby", -1)
 	pipe.HSet("user:by-username", username, id)
 	_, err = pipe.Exec()
 	if err != nil {
@@ -52,6 +59,20 @@ func (u *User) GetUsername() (string, error) {
 func (u *User) GetHash() ([]byte, error) {
 	key := fmt.Sprintf("user:%d", u.id)
 	return client.HGet(key, "hash").Bytes()
+}
+
+// GetLobby Lobby getter
+func (u *User) GetLobby() (*Lobby, error) {
+	key := fmt.Sprintf("user:%d", u.id)
+
+	id, err := client.HGet(key, "lobby").Int64()
+	if err != nil {
+		return nil, err
+	}
+	if id == -1 {
+		return nil, ErrUserNotInLobby
+	}
+	return &Lobby{id: id}, nil
 }
 
 // Authenticate will validates the login attempt

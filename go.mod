@@ -3,6 +3,7 @@ module github.com/gocs/davy
 go 1.15
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0

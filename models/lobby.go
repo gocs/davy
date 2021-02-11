@@ -34,7 +34,7 @@ func NewLobby(hostID int64, length int) (*Lobby, error) {
 	pipe.HSet(key, "id", id)
 	pipe.HSet(key, "code", code)
 	pipe.HSet(key, "host_id", hostID)
-	pipe.HSet(key, "status", StatusCode(0))
+	pipe.HSet(key, "status", StatusWaiting)
 	pipe.HSet("lobby:by-code", code, id)
 	pipe.HSet(fmt.Sprintf("user:%d", hostID), "lobby", id)
 	pipe.SAdd(fmt.Sprintf("lobby:%d:members", id), hostID)
@@ -46,12 +46,16 @@ func NewLobby(hostID int64, length int) (*Lobby, error) {
 	return &Lobby{id: id}, nil
 }
 
-// StatusCode this returns the status as strings; choices are "waiting", "starting", "on-going", and "ended"
-func StatusCode(status int) string {
-	return []string{
-		"waiting", "starting", "on-going", "ended",
-	}[status]
-}
+const (
+	// StatusWaiting means the status is "waiting"
+	StatusWaiting  = 0
+	// StatusStarting means the status is "starting"
+	StatusStarting = 1
+	// StatusOngoing means the status is "on-going"
+	StatusOngoing  = 2
+	// StatusEnded means the status is "ended"
+	StatusEnded    = 3
+)
 
 // GetLobbyID LobbyID getter
 func (l *Lobby) GetLobbyID() (int64, error) {

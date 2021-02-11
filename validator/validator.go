@@ -8,7 +8,7 @@ import (
 
 var (
 	// ErrInvalidUsernameFormat gives error message when user attempts to join a lobby when is already in lobby
-	ErrInvalidUsernameFormat = errors.New("username is not valid (ex. A-z 0-9 - _)")
+	ErrInvalidUsernameFormat = errors.New("username is not valid (example valid: 2 < length < 20 and must be A-z 0-9 - _)")
 )
 
 // Username must contain alphanumerics, dashes, or unserscores and is from 2 to 20 characters long

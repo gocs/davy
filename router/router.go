@@ -9,6 +9,7 @@ import (
 	"github.com/gocs/davy/models"
 	"github.com/gocs/davy/servererrors"
 	"github.com/gocs/davy/sessions"
+	"github.com/gocs/davy/validator"
 	"github.com/gorilla/mux"
 )
 
@@ -276,6 +277,8 @@ func (a *App) registerPostHandler(w http.ResponseWriter, r *http.Request) {
 		switch err {
 		case models.ErrUsernameTaken:
 			a.tmpl.ExecuteTemplate(w, "register.html", LoginPayload{Error: "username taken"})
+		case validator.ErrInvalidUsernameFormat:
+			a.tmpl.ExecuteTemplate(w, "register.html", LoginPayload{Error: err.Error()})
 		default:
 			servererrors.InternalServerError(w, err.Error())
 		}

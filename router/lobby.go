@@ -87,21 +87,10 @@ func (a *App) lobbyPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	choice := r.PostForm.Get("choice")
-	var code string
-	if choice == "join" {
-		code = r.PostForm.Get("code")
-
-		err := models.JoinLobby(code, userID)
-		if err != nil {
-			servererrors.InternalServerError(w, fmt.Sprintf("JoinLobby: %v", err))
-			return
-		}
-	} else {
-		_, err := models.NewLobby(userID, 5)
-		if err != nil {
-			servererrors.InternalServerError(w, fmt.Sprintf("NewLobby: %v", err))
-			return
-		}
+	code := r.PostForm.Get("code")
+	if err := models.JoinOrCreateLobby(choice, code, userID); err != nil {
+		servererrors.InternalServerError(w, fmt.Sprintf("JoinOrCreateLobby: %v", err))
+		return
 	}
 
 	http.Redirect(w, r, r.Referer(), http.StatusFound)

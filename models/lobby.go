@@ -212,3 +212,12 @@ func JoinLobby(code string, userID int64) error {
 	}
 	return l.AddMember(userID)
 }
+
+// JoinOrCreateLobby process whether the lobby is joined or created by the current user
+func JoinOrCreateLobby(choice, code string, userID int64) error {
+	if choice == "join" {
+		return JoinLobby(code, userID)
+	}
+	_, err := NewLobby(userID, 5)
+	return err
+}

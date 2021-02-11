@@ -141,6 +141,7 @@ nav a.nav-link,
     margin-bottom: .5em;
 }
 
-.input-center {
+.input-center,
+.text-center {
     text-align: center;
 }

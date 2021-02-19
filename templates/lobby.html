@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}} / Updates / Davy</title>
+    <title>{{.Title}} {{if .Joined}}/ In-game {{end}}/ Davy</title>
     <link rel="stylesheet" type="text/css" href="/static/index.css">
 </head>
 
@@ -28,12 +28,8 @@
         <div id="game" class="center">
             <h2 class="text-center">Code: {{.Code}}</h2>
         </div>
-        {{range .Players}}
-        <div class="players">
-            <div><strong><a href="/{{.}}"><span>{{.}}</span></a></strong></div>
-            <div><button>kick</button></div>
-        </div>
-        {{end}}
+        <form action="/lobby/leave" method="post" class="form-inline"><button id="btn-leave">Leave lobby</button></form>
+        <div id="players-list"></div>
         {{else}}
         <div id="game" class="center">
             <form method="post">
@@ -49,6 +45,50 @@
         </div>
         {{end}}
     </main>
+
+    {{if .Joined}}
+    <script>
+        var url = "ws://" + window.location.host + "/lobbyws";
+        var ws = new WebSocket(url);
+
+        // remember this will only run once which is upon loading
+        if (checkElExists('players-list')) {
+            ws.onopen = function() {
+                ws.onmessage = function(msg) {
+                    var parts = msg.data.split(" ");
+                    var playerDiv = '';
+                    for (const p of parts) {
+                        playerDiv += `<div class="players">
+                        <div><strong><a href="/${p}"><span>${p}</span></a></strong></div>
+                        <div><form action="/lobby/kick" method="post" class="form-inline">
+                            <input type="hidden" name="username" value="${p}">
+                            <button>Kick</button></form></div>
+                        </div>`
+                    }
+                    document.getElementById("players-list").innerHTML = playerDiv;
+                    ws.send(msg.data);
+                };
+            }
+            ws.onclose = function() {
+                ws.onmessage = function(msg) { ws.send(msg.data); }
+            };
+        }
+
+        document.getElementById("btn-leave").addEventListener("click", closeLobbyHandler)
+        function closeLobbyHandler(e) {
+            ws.close();
+        }
+
+        /**
+         * @returns true if an element exists
+         *              otherwise none
+         */
+        function checkElExists(name) {
+            var element =  document.getElementById('players-list');
+            return typeof(element) != 'undefined' && element != null;
+        }
+    </script>
+    {{end}}
 </body>
 
 </html>

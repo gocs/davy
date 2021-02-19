@@ -11,6 +11,7 @@ import (
 	"github.com/gocs/davy/sessions"
 	"github.com/gocs/davy/validator"
 	"github.com/gorilla/mux"
+	"gopkg.in/olahol/melody.v1"
 )
 
 // NewRouter creates a new router to access some pages
@@ -24,6 +25,7 @@ func NewRouter(sessionKey string) (*mux.Router, error) {
 	a := App{
 		sessions: sessions.New(sessionKey),
 		tmpl:     loader.NewTemplates("templates/*.html"),
+		m:        melody.New(),
 	}
 
 	mar := middleware.AuthRequired(a.sessions.Store)
@@ -41,6 +43,9 @@ func NewRouter(sessionKey string) (*mux.Router, error) {
 
 	r.HandleFunc("/lobby", mar(a.lobbyGetHandler)).Methods("GET")
 	r.HandleFunc("/lobby", mar(a.lobbyPostHandler)).Methods("POST")
+	r.HandleFunc("/lobbyws", mar(a.lobbyWS())).Methods("GET")
+	r.HandleFunc("/lobby/kick", mar(a.kickPostHandler)).Methods("POST")
+	r.HandleFunc("/lobby/leave", mar(a.leavePostHandler)).Methods("POST")
 
 	r.HandleFunc("/rank", a.listTopRank).Methods("GET")
 	r.HandleFunc("/rank/me", a.getCurrentStandings).Methods("GET")
@@ -57,6 +62,7 @@ func NewRouter(sessionKey string) (*mux.Router, error) {
 type App struct {
 	sessions *sessions.Session
 	tmpl     *loader.Templates
+	m        *melody.Melody
 }
 
 // IndexPayload is the data to pass to the template

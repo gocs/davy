@@ -49,6 +49,12 @@ var (
 
 	// ErrUserNotInLobby gives error message when user attempts to get its current lobby when is not in lobby
 	ErrUserNotInLobby = errors.New("user is currently not joined in to a lobby")
+
+	// ErrLobbyEmptyMembers gives error message when the lobby has no members
+	ErrLobbyEmptyMembers = errors.New("lobby is currently empty")
+
+	// ErrGameEnded gives error message when the game has already ended
+	ErrGameEnded = errors.New("game has already end")
 )
 
 // MigrateQuestions sends the questions.json to the redis server

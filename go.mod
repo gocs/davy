@@ -8,7 +8,9 @@ require (
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/onsi/ginkgo v1.14.2 // indirect
 	github.com/onsi/gomega v1.10.4 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+	gopkg.in/olahol/melody.v1 v1.0.0-20170518105555-d52139073376
 )

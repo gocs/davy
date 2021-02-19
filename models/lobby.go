@@ -88,6 +88,17 @@ func (l *Lobby) SetHostID(hostID int64) error {
 	return err
 }
 
+func (l *Lobby) GetStatus() (int64, error) {
+	key := fmt.Sprintf("lobby:%d", l.id)
+	return client.HGet(key, "status").Int64()
+}
+
+func (l *Lobby) SetStatus(status int64) error {
+	key := fmt.Sprintf("lobby:%d", l.id)
+	_, err := client.HSet(key, "status", status).Result()
+	return err
+}
+
 // IsMember checks if the user is a member
 func (l *Lobby) IsMember(userID int64) (bool, error) {
 	return client.SIsMember(fmt.Sprintf("lobby:%d:members", l.id), userID).Result()
@@ -95,6 +106,14 @@ func (l *Lobby) IsMember(userID int64) (bool, error) {
 
 // GetTopMember gets the member supposedly inherits the host role
 func (l *Lobby) GetTopMember() (*User, error) {
+	count, err := client.SCard(fmt.Sprintf("lobby:%d:members", l.id)).Result()
+	if err != nil {
+		return nil, err
+	}
+	if count <= 0 {
+		return nil, ErrLobbyEmptyMembers
+	}
+
 	ids, err := client.SMembers(fmt.Sprintf("lobby:%d:members", l.id)).Result()
 	if err != nil {
 		return nil, err
@@ -152,7 +171,7 @@ func (l *Lobby) LeaveLobby(userID int64) error {
 	}
 
 	pipe := client.Pipeline()
-	pipe.HSet(fmt.Sprintf("user:%d", hostID), "lobby", -1)
+	pipe.HSet(fmt.Sprintf("user:%d", userID), "lobby", -1)
 	pipe.SRem(fmt.Sprintf("lobby:%d:members", l.id), userID)
 	_, err = pipe.Exec()
 	if err != nil {
@@ -165,6 +184,10 @@ func (l *Lobby) LeaveLobby(userID int64) error {
 
 	u, err := l.GetTopMember()
 	if err != nil {
+		if err == ErrLobbyEmptyMembers {
+			l.CloseLobby()
+			return nil
+		}
 		return err
 	}
 
@@ -174,8 +197,23 @@ func (l *Lobby) LeaveLobby(userID int64) error {
 	return err
 }
 
+// CloseLobby sets the lobby status to ended then permits entering of member
+func (l *Lobby) CloseLobby() error {
+	key := fmt.Sprintf("lobby:%d", l.id)
+	_, err := client.HSet(key, "status", StatusEnded).Result()
+	return err
+}
+
 // AddMember adds a member to the lobby
 func (l *Lobby) AddMember(userID int64) error {
+	status, err := l.GetStatus()
+	if err != nil {
+		return err
+	}
+	if status == StatusEnded {
+		return ErrGameEnded
+	}
+
 	userIsMember, err := l.IsMember(userID)
 	if err != nil {
 		return err
@@ -224,4 +262,9 @@ func JoinOrCreateLobby(choice, code string, userID int64) error {
 	}
 	_, err := NewLobby(userID, 5)
 	return err
+}
+
+func GetLobbyByUserID(userID int64) (*Lobby, error) {
+	u := &User{id: userID}
+	return u.GetLobby()
 }

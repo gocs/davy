@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/gocs/davy/models"
 	"github.com/gorilla/sessions"
 )
 
@@ -19,6 +20,16 @@ func AuthRequired(store StoreGetter) func(handler http.HandlerFunc) http.Handler
 			u, ok := session.Values["user_id"]
 			// if user doesn't existed and user is nil
 			if !ok || u == nil {
+				http.Redirect(w, r, "/login", http.StatusFound)
+				return
+			}
+			userID, ok := u.(int64)
+			if !ok {
+				http.Redirect(w, r, "/login", http.StatusFound)
+				return
+			}
+			aUser, err := models.IsUser(userID)
+			if err != nil || !aUser {
 				http.Redirect(w, r, "/login", http.StatusFound)
 				return
 			}

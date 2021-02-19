@@ -21,7 +21,7 @@ func NewUser(username string, hash []byte) (*User, error) {
 	if exists {
 		return nil, ErrUsernameTaken
 	}
-	
+
 	err = validator.Username(username)
 	if err != nil {
 		return nil, err
@@ -103,6 +103,16 @@ func RegisterUser(username, password string) error {
 
 	_, err = newUserQuestion(u.id)
 	return err
+}
+
+// IsUser checks if username has registered in this site
+func IsUser(userID int64) (bool, error) {
+	u := &User{id: userID}
+	un, err := u.GetUsername()
+	if err != nil || un == "" {
+		return false, err
+	}
+	return true, nil
 }
 
 // GetUserByUserID gets user using a user id

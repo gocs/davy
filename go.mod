@@ -1,6 +1,6 @@
 module github.com/gocs/davy
 
-go 1.15
+go 1.23.0
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
@@ -8,9 +8,15 @@ require (
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
+	golang.org/x/crypto v0.35.0
+	gopkg.in/olahol/melody.v1 v1.0.0-20170518105555-d52139073376
+)
+
+require (
+	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/onsi/ginkgo v1.14.2 // indirect
 	github.com/onsi/gomega v1.10.4 // indirect
-	golang.org/x/crypto v0.31.0
-	gopkg.in/olahol/melody.v1 v1.0.0-20170518105555-d52139073376
+	github.com/pkg/errors v0.9.1 // indirect
+	golang.org/x/net v0.25.0 // indirect
 )
